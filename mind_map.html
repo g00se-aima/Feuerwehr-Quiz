@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mind Map</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .mindmap-container {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            flex-wrap: wrap;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .main-node {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .core-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .core-bubble:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+        }
+
+        .core-bubble.wachbetrieb {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .core-bubble.enaio {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .core-bubble.edp {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .sub-bubbles {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .sub-bubble {
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .core-bubble.wachbetrieb ~ .sub-bubbles .sub-bubble {
+            border-color: #f5576c;
+            color: #f5576c;
+        }
+
+        .core-bubble.enaio ~ .sub-bubbles .sub-bubble {
+            border-color: #00f2fe;
+            color: #00f2fe;
+        }
+
+        .core-bubble.edp ~ .sub-bubbles .sub-bubble {
+            border-color: #43e97b;
+            color: #43e97b;
+        }
+
+        .sub-bubble:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .sub-bubble.duplicate {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffe8a1 100%);
+            border: 3px solid #ff9800 !important;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .sub-bubble.duplicate::before {
+            content: "⭐";
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5em;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.2); }
+        }
+
+        .sub-bubble .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sub-bubble:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .add-bubble-btn {
+            background: white;
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            color: #667eea;
+            font-size: 2em;
+        }
+
+        .add-bubble-btn:hover {
+            transform: scale(1.05);
+            background: #f8f9fa;
+            border-color: #764ba2;
+            color: #764ba2;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 1em;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-create {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-create:hover {
+            background: #764ba2;
+        }
+
+        .btn-cancel {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-cancel:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-back {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-back:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateX(-3px);
+        }
+
+        .control-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-save, .btn-load {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-weight: bold;
+        }
+
+        .btn-save:hover, .btn-load:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .info {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            font-size: 0.9em;
+            max-width: 250px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        @media (max-width: 1200px) {
+            .mindmap-container {
+                flex-direction: column;
+                gap: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="btn-back" onclick="window.location.href='index.html'">← Zurück</button>
+
+    <div class="control-buttons">
+        <button class="btn-save" onclick="exportData()">💾 Speichern</button>
+        <button class="btn-load" onclick="document.getElementById('loadFileInput').click()">📂 Laden</button>
+        <input type="file" id="loadFileInput" accept=".json" style="display:none;" onchange="importData(event)">
+    </div>
+
+    <div class="header">
+        <h1> Mind Map</h1>
+        <p>Interaktive Organisationsstruktur</p>
+    </div>
+
+    <div class="mindmap-container">
+        <!-- WACHBETRIEB -->
+        <div class="main-node">
+            <div class="core-bubble wachbetrieb" onclick="selectSource('wachbetrieb')">
+                <div>🚒<br>Wachbetrieb</div>
+            </div>
+            <div class="sub-bubbles" id="wachbetrieb-bubbles">
+                <div class="sub-bubble">Schichtplanung <button class="delete-btn" onclick="deleteBubble(this)">×</button></div>
+                <div class="sub-bubble">Fahrzeuge <button class="delete-btn" onclick="deleteBubble(this)">×</button></div>
+                <div class="sub-bubble">Einsätze <button class="delete-btn" onclick="deleteBubble(this)">×</button></div>
+                <div class="sub-bubble">Personal <button class="delete-btn" onclick="deleteBubble(this)">×</button></div>
+            </div>
+            <button class="add-bubble-btn" onclick="selectSource('wachbetrieb')">+</button>
+        </div>
+
+        <!-- ENAIO -->
+        <div class="main-node">
+            <div class="core-bubble enaio" onclick="selectSource('enaio')">
+                <div>📱<br>Enaio</div>
+            </div>
+            <div class="sub-bubbles" id="enaio-bubbles">
+                <div class="sub-bubble">Dokumentation <button class="delete-btn" onclick="deleteBubble(this)">×</button></div>
+                <div class="sub-bubble">Archive <button class="delete-btn" onclick="deleteBubble(this)">×</button></div>
+                <div class="sub-bubble">Verwaltung <button class="delete-btn" onclick="deleteBubble(this)">×</button></div>
+                <div class="sub-bubble">Berichte <button class="delete-btn" onclick="deleteBubble(this)">×</button></div>
+            </div>
+            <button class="add-bubble-btn" onclick="selectSource('enaio')">+</button>
+        </div>
+
+        <!-- EDP -->
+        <div class="main-node">
+            <div class="core-bubble edp" onclick="selectSource('edp')">
+                <div>💻<br>EDP</div>
+            </div>
+            <div class="sub-bubbles" id="edp-bubbles">
+                <div class="sub-bubble">Datenbank <button class="delete-btn" onclick="deleteBubble(this)">×</button></div>
+                <div class="sub-bubble">Systeme <button class="delete-btn" onclick="deleteBubble(this)">×</button></div>
+                <div class="sub-bubble">Netzwerk <button class="delete-btn" onclick="deleteBubble(this)">×</button></div>
+                <div class="sub-bubble">Sicherheit <button class="delete-btn" onclick="deleteBubble(this)">×</button></div>
+            </div>
+            <button class="add-bubble-btn" onclick="selectSource('edp')">+</button>
+        </div>
+    </div>
+
+    <!-- Modal for adding new bubbles -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Neue Blase hinzufügen</h2>
+            <input type="text" id="bubbleInput" placeholder="Name der neuen Blase..." autofocus>
+            <div class="modal-buttons">
+                <button class="btn-create" onclick="createBubble()">Erstellen</button>
+                <button class="btn-cancel" onclick="closeModal()">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="info">
+        ℹ️ Klicke auf "+" um neue Blasen hinzuzufügen. Klicke auf "×" um sie zu löschen.
+    </div>
+
+    <script>
+        let currentSource = null;
+
+        function selectSource(source) {
+            currentSource = source;
+            const modal = document.getElementById('addModal');
+            const title = document.getElementById('modalTitle');
+            const sourceNames = {
+                'wachbetrieb': 'Wachbetrieb',
+                'enaio': 'Enaio',
+                'edp': 'EDP'
+            };
+            title.textContent = `Neue Blase zu ${sourceNames[source]} hinzufügen`;
+            modal.classList.add('active');
+            document.getElementById('bubbleInput').focus();
+        }
+
+        function createBubble() {
+            const input = document.getElementById('bubbleInput');
+            const text = input.value.trim();
+
+            if (!text) {
+                alert('Bitte geben Sie einen Namen ein');
+                return;
+            }
+
+            if (!currentSource) return;
+
+            const container = document.getElementById(`${currentSource}-bubbles`);
+            const newBubble = document.createElement('div');
+            newBubble.className = 'sub-bubble';
+            newBubble.innerHTML = `${text} <button class="delete-btn" onclick="deleteBubble(this)">×</button>`;
+            
+            container.insertBefore(newBubble, container.lastElementChild);
+            
+            input.value = '';
+            closeModal();
+            saveBubbles();
+        }
+
+        function deleteBubble(btn) {
+            if (confirm('Diese Blase wirklich löschen?')) {
+                btn.closest('.sub-bubble').remove();
+                saveBubbles();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('addModal').classList.remove('active');
+            currentSource = null;
+        }
+
+        function saveBubbles() {
+            const data = {
+                wachbetrieb: [],
+                enaio: [],
+                edp: []
+            };
+
+            ['wachbetrieb', 'enaio', 'edp'].forEach(source => {
+                const bubbles = document.querySelectorAll(`#${source}-bubbles .sub-bubble`);
+                bubbles.forEach(bubble => {
+                    const text = bubble.textContent.replace('×', '').trim();
+                    if (text) {
+                        data[source].push(text);
+                    }
+                });
+            });
+
+            localStorage.setItem('mindmapData', JSON.stringify(data));
+            
+            // Re-highlight duplicates after saving
+            highlightDuplicates(data);
+        }
+
+        function loadBubbles() {
+            const saved = localStorage.getItem('mindmapData');
+            if (!saved) return;
+
+            const data = JSON.parse(saved);
+            
+            ['wachbetrieb', 'enaio', 'edp'].forEach(source => {
+                const container = document.getElementById(`${source}-bubbles`);
+                
+                container.innerHTML = '';
+                
+                data[source].forEach(text => {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'sub-bubble';
+                    bubble.innerHTML = `${text} <button class="delete-btn" onclick="deleteBubble(this)">×</button>`;
+                    container.appendChild(bubble);
+                });
+            });
+
+            // Highlight duplicates across sources
+            highlightDuplicates(data);
+        }
+
+        function highlightDuplicates(data) {
+            // Collect all bubble texts with their sources
+            const bubbleMap = {};
+            
+            ['wachbetrieb', 'enaio', 'edp'].forEach(source => {
+                data[source].forEach(text => {
+                    if (!bubbleMap[text]) {
+                        bubbleMap[text] = [];
+                    }
+                    bubbleMap[text].push(source);
+                });
+            });
+
+            // Mark duplicates (appear in 2 or more sources)
+            ['wachbetrieb', 'enaio', 'edp'].forEach(source => {
+                const bubbles = document.querySelectorAll(`#${source}-bubbles .sub-bubble`);
+                bubbles.forEach(bubble => {
+                    const text = bubble.textContent.replace('×', '').trim();
+                    if (bubbleMap[text] && bubbleMap[text].length > 1) {
+                        bubble.classList.add('duplicate');
+                    }
+                });
+            });
+        }
+
+        function createAddButton(source) {
+            const btn = document.createElement('button');
+            btn.className = 'add-bubble-btn';
+            btn.textContent = '+';
+            btn.onclick = () => selectSource(source);
+            return btn;
+        }// Handle Enter key in modal
+        document.getElementById('bubbleInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                createBubble();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Load bubbles on page load
+        window.addEventListener('load', loadBubbles);
+
+        // Export data as JSON
+        function exportData() {
+            const saved = localStorage.getItem('mindmapData');
+            if (!saved) {
+                alert('Keine Daten zu speichern!');
+                return;
+            }
+
+            const data = JSON.parse(saved);
+            const jsonString = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `mindmap-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            alert('✓ Daten gespeichert!');
+        }
+
+        // Import data from JSON file
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    // Validate data structure
+                    if (!data.wachbetrieb || !data.enaio || !data.edp) {
+                        throw new Error('Ungültiges Dateiformat');
+                    }
+
+                    // Save to localStorage
+                    localStorage.setItem('mindmapData', JSON.stringify(data));
+                    
+                    // Reload bubbles
+                    loadBubbles();
+                    alert('✓ Daten geladen!');
+                } catch (err) {
+                    alert('✗ Fehler beim Laden: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset input
+            event.target.value = '';
+        }
+    </script>
+</body>
+</html>

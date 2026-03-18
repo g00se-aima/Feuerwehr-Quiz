@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FWDV1 Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 40px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .question {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+        }
+        
+        .question-number {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .question-text {
+            margin-bottom: 12px;
+            color: #333;
+            font-size: 1em;
+            line-height: 1.5;
+        }
+        
+        .options {
+            margin-left: 20px;
+        }
+        
+        .option {
+            margin: 8px 0;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+        
+        .option:hover {
+            background: #e8eaf6;
+        }
+        
+        .option input[type="radio"] {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        
+        .option label {
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .button-container {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin: 10px 5px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .results {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f4ff;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .results.show {
+            display: block;
+        }
+        
+        .result-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .score-display {
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+            font-size: 0.9em;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📋 FWDV1 Test</h1>
+            <p class="subtitle">Multiple Choice Questions</p>
+        </header>
+        
+        <form id="testForm">
+            <div class="section">
+                <div class="section-title">Test Section</div>
+                <!-- Add your questions here -->
+            </div>
+            
+            <div class="button-container">
+                <button type="button" onclick="submitTest()">📊 Submit Test</button>
+                <button type="button" onclick="resetTest()">🔄 Reset Test</button>
+            </div>
+        </form>
+        
+        <div id="results" class="results">
+            <div class="result-title">📈 Test Results</div>
+            <div class="score-display" id="scoreDisplay"></div>
+        </div>
+        
+        <div class="footer">
+            <p>FWDV1 Test</p>
+        </div>
+    </div>
+    
+    <script>
+        function submitTest() {
+            alert('Test submitted!');
+        }
+        
+        function resetTest() {
+            document.getElementById('testForm').reset();
+            document.getElementById('results').classList.remove('show');
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>
