@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feuerwehr Quiz - GF Basis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .quiz-section {
+            margin-bottom: 25px;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .question-text {
+            color: #333;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background-color: #f8f9ff;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-submit {
+            background-color: #667eea;
+            color: white;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .btn-submit:hover {
+            background-color: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-reset {
+            background-color: #e0e0e0;
+            color: #333;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .btn-reset:hover {
+            background-color: #d0d0d0;
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .score-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .result-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #ddd;
+            background: white;
+            border-radius: 3px;
+        }
+
+        .result-item.correct {
+            border-left-color: #4caf50;
+            background: #f1f8f4;
+        }
+
+        .result-item.incorrect {
+            border-left-color: #f44336;
+            background: #fef5f5;
+        }
+
+        .result-question {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .result-answer {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        .your-answer {
+            color: #666;
+        }
+
+        .correct-answer {
+            color: #4caf50;
+            font-weight: 500;
+        }
+
+        .incorrect-answer {
+            color: #f44336;
+        }
+
+        .status-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .status-icon.correct {
+            background-color: #4caf50;
+        }
+
+        .status-icon.incorrect {
+            background-color: #f44336;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn-submit, .btn-reset {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚒 Feuerwehr Quiz</h1>
+        <p class="subtitle">GF Basis - Testvorbereitung</p>
+
+        <div id="quizContent"></div>
+
+        <div class="button-group">
+            <button class="btn-submit" onclick="submitQuiz()">Antworten überprüfen</button>
+            <button class="btn-reset" onclick="resetQuiz()">Zurücksetzen</button>
+        </div>
+
+        <div id="results" class="results"></div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                id: 1,
+                question: "Vorgehen bei Einsturz - Nennen Sie das Akronym und die Schritte:",
+                correctAnswers: [
+                    "SHV",
+                    "shv",
+                    "Sehen Hören Vermuten",
+                    "sehen hören vermuten",
+                    "S H V"
+                ]
+            },
+            {
+                id: 2,
+                question: "ABC GAMS nach FWDV 500 - Nennen Sie das Akronym und alle vier Schritte:",
+                correctAnswers: [
+                    "GAMS",
+                    "gams",
+                    "Gefahr erkennen Absperren Menschenrettung Spezialkräfte alarmieren"
+                ]
+            },
+            {
+                id: 3,
+                question: "Die GEA Prüfung für Maßnahmen - Nennen Sie das Akronym und die Fragen:",
+                correctAnswers: [
+                    "GEA",
+                    "gea",
+                    "Geeignet Erforderlich Angemessen"
+                ]
+            },
+            {
+                id: 4,
+                question: "Wer ist in welcher Reihenfolge verantwortlich in Einsatzlagen? (Nennen Sie die 5 Kategorien in korrekter Reihenfolge):",
+                correctAnswers: [
+                    "Verhaltensstörer Zustandsstörer Zuständige Behörde Andere Behörde Nicht-Störer"
+                ]
+            },
+            {
+                id: 5,
+                question: "Welche zwei Rettungsmodi gibt es?",
+                correctAnswers: [
+                    "Schnelle zeitkontrollierte Rettung Sofortrettung",
+                    "Sofortrettung Schnelle zeitkontrollierte Rettung"
+                ]
+            },
+            {
+                id: 6,
+                question: "Wie lautet die AUTO Regel? (Nennen Sie das Akronym und die vier Schritte):",
+                correctAnswers: [
+                    "AUTO",
+                    "auto",
+                    "Austretende Betriebsstoffe Unterboden erkunden Tankdeckel öffnen Oberflächen absuchen"
+                ]
+            },
+            {
+                id: 7,
+                question: "Welche Führungsstufen gibt es? (Nennen Sie alle vier Stufen mit ihren Definitionen):",
+                correctAnswers: [
+                    "A B C D",
+                    "Führen ohne Führungseinheit Führen mit örtlicher Führungseinheit Führen mit einer Führungsgruppe Führen mit Führungsgruppe oder Stab"
+                ]
+            },
+            {
+                id: 8,
+                question: "Welche Dinge sollte der Melder erkunden? (Nennen Sie das Akronym und die vier Kategorien):",
+                correctAnswers: [
+                    "SPAZ",
+                    "spaz",
+                    "Schadensmerkmale Personen Aufstellflächen Zugänge"
+                ]
+            },
+            {
+                id: 9,
+                question: "Was gehört zu einer ordentlichen Erkundung? (Nennen Sie alle 6 Komponenten):",
+                correctAnswers: [
+                    "Allgemeine Lage erfassen Gefahrenlage erfassen Gefahrenabwehr festlegen Die Anfahrt Der Einsatzort Die Zusammenführung der Erkundungsergebnisse"
+                ]
+            },
+            {
+                id: 10,
+                question: "Wie lautet das Melden-Schema? (Nennen Sie das Akronym und alle sechs Punkte):",
+                correctAnswers: [
+                    "MELDEN",
+                    "melden",
+                    "Meldender Einsatzstelle Lage Durchgeführte und eingeleitete Maßnahmen Eingesetzte Kräfte und Mittel Nachforderung"
+                ]
+            },
+            {
+                id: 11,
+                question: "Welcher Abstand ist zu einem Gleisbett zu halten?",
+                correctAnswers: [
+                    "3,3 Meter",
+                    "3.3 Meter",
+                    "3,3 m",
+                    "3.3 m",
+                    "3,3",
+                    "3.3"
+                ]
+            },
+            {
+                id: 12,
+                question: "Was gehört alles zu einem rechtssicheren Platzverweis? (Nennen Sie alle 6 Komponenten):",
+                correctAnswers: [
+                    "Adressat Zeitliche Komponente Örtliche Komponente Verhältnismäßigkeit Abschlussfloskel Der sofortige Vollzug wird angeordnet"
+                ]
+            },
+            {
+                id: 13,
+                question: "Was sind die 4 Phasen einer Erkundung?",
+                correctAnswers: [
+                    "Frontalansicht Personenbefragung Zugänge Gesamtübersicht"
+                ]
+            }
+        ];
+
+        function initializeQuiz() {
+            const quizContent = document.getElementById('quizContent');
+            quizContent.innerHTML = '';
+
+            questions.forEach(q => {
+                const section = document.createElement('div');
+                section.className = 'quiz-section';
+                section.innerHTML = `
+                    <div class="question-number">Frage ${q.id} von ${questions.length}</div>
+                    <div class="question-text">${q.question}</div>
+                    <textarea 
+                        class="answer-input" 
+                        data-question-id="${q.id}" 
+                        placeholder="Geben Sie Ihre Antwort ein..."
+                        rows="3"
+                    ></textarea>
+                `;
+                quizContent.appendChild(section);
+            });
+        }
+
+        function normalizeAnswer(answer) {
+            return answer.trim().toLowerCase().replace(/\s+/g, ' ');
+        }
+
+        // Calculate similarity between two strings (0 to 1)
+        function calculateSimilarity(str1, str2) {
+            const s1 = normalizeAnswer(str1);
+            const s2 = normalizeAnswer(str2);
+            
+            // If exact match, return 1
+            if (s1 === s2) return 1;
+            
+            // Calculate word-based similarity
+            const words1 = s1.split(' ');
+            const words2 = s2.split(' ');
+            
+            let matchingWords = 0;
+            words1.forEach(word => {
+                if (words2.includes(word)) {
+                    matchingWords++;
+                }
+            });
+            
+            const totalWords = Math.max(words1.length, words2.length);
+            const wordSimilarity = matchingWords / totalWords;
+            
+            // Calculate character-based similarity (Levenshtein-inspired)
+            const maxLen = Math.max(s1.length, s2.length);
+            let charMatches = 0;
+            const minLen = Math.min(s1.length, s2.length);
+            
+            for (let i = 0; i < minLen; i++) {
+                if (s1[i] === s2[i]) charMatches++;
+            }
+            
+            const charSimilarity = maxLen > 0 ? charMatches / maxLen : 0;
+            
+            // Weighted average: 70% word similarity, 30% character similarity
+            return (wordSimilarity * 0.7) + (charSimilarity * 0.3);
+        }
+
+        function checkAnswer(userAnswer, correctAnswers) {
+            const threshold = 0.65; // 65% similarity needed
+            
+            return correctAnswers.some(correct => {
+                const similarity = calculateSimilarity(userAnswer, correct);
+                return similarity >= threshold;
+            });
+        }
+
+        function submitQuiz() {
+            const results = [];
+            let score = 0;
+
+            questions.forEach(q => {
+                const input = document.querySelector(`[data-question-id="${q.id}"]`);
+                const userAnswer = input.value.trim();
+                const isCorrect = checkAnswer(userAnswer, q.correctAnswers);
+
+                if (isCorrect) score++;
+
+                results.push({
+                    question: q.question,
+                    userAnswer: userAnswer || '(Keine Antwort)',
+                    correctAnswers: q.correctAnswers,
+                    isCorrect: isCorrect
+                });
+            });
+
+            displayResults(results, score);
+        }
+
+        function displayResults(results, score) {
+            const resultsDiv = document.getElementById('results');
+            const percentage = Math.round((score / questions.length) * 100);
+
+            let html = `
+                <div class="score-display">
+                    Ergebnis: ${score} von ${questions.length} (${percentage}%)
+                </div>
+            `;
+
+            results.forEach((result, index) => {
+                const statusClass = result.isCorrect ? 'correct' : 'incorrect';
+                const statusIcon = result.isCorrect ? '✓' : '✗';
+
+                html += `
+                    <div class="result-item ${statusClass}">
+                        <div class="result-question">
+                            <span class="status-icon ${statusClass}">${statusIcon}</span>
+                            Frage ${index + 1}: ${result.question}
+                        </div>
+                        <div class="result-answer your-answer">
+                            <strong>Ihre Antwort:</strong> ${result.userAnswer}
+                        </div>
+                `;
+
+                if (!result.isCorrect) {
+                    html += `
+                        <div class="result-answer correct-answer">
+                            <strong>Korrekte Antwort(en):</strong> ${result.correctAnswers.join(' / ')}
+                        </div>
+                    `;
+                }
+
+                html += `</div>`;
+            });
+
+            resultsDiv.innerHTML = html;
+            resultsDiv.classList.add('show');
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        function resetQuiz() {
+            document.querySelectorAll('.answer-input').forEach(input => {
+                input.value = '';
+            });
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('results').innerHTML = '';
+            window.scrollTo(0, 0);
+        }
+
+        // Initialize quiz when page loads
+        window.addEventListener('load', initializeQuiz);
+    </script>
+</body>
+</html>
